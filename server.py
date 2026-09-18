@@ -8,60 +8,34 @@ import string
 
 app = Flask(__name__)
 
-ADMIN_PASSWORD = "boss_rufino_secure_password"
+ADMIN_PASSWORD = "omegaaimbot"
 
-# Solusyon: Gagamitin natin ang base64 o kaya hiwalay na linya na lininis nang diretso
-private_key_lines = [
-    "-----BEGIN PRIVATE KEY-----",
-    "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDV8zNneh9Sc9pS",
-    "vuJcb4Hy6rAD+hL9JjHnMdSP2yGVGpgWKhH8PWrDwkqZcDM7fpJaWb+xgLbQ2k1T",
-    "xqFlJXNQ3/1GUqNubVUyM/+wnx4t1G/E9ceessJyg0lBxhjYeCwEu2U7KbQBgl1B",
-    "KNWE+AOzKJ45lNKmebKYbBn08cN32Cq4PS7FI+jlS29Z55hNr7BbfsSE4Jb9EpIE",
-    "7PqRSzPp47lrz1xWR94mtqrP2a4toT4vI+NsSayjTqBQQnL8l/PI6dQCOH7vv+tW",
-    "2uILCxxwrYs+Vyl/YhrjD8IZGhSqdY5uSFefqriZ2fltu+CuXqkXH5SUFBIrQBi0",
-    "hAMNWk51AgMBAAECggEAHCuCaCx/NUcFxwFVIqCX9pkKBewGVgiSZ4N7HlnW6R/w",
-    "SHLPnWukxBOv6NYKGNpIgNbyU3fEGmmz5sTveTbeIRbs7TZySFbi8dJA50t8GMKw",
-    "2LkXyIB288bvfVaM7OuduB3IbWrHRa+ZgbvTqUdSjWNaufArcDnz1vfczxCKERxK",
-    "mSy0XUK6gyZ7JBoWSSjA8rCv5Xez5VkvJDwKGo4iQavcLv7YfqCu9xgvh+LApu81",
-    "CCWyZ4CnMUzf8SJMZbZejnRSKIX8p9kEg7/p/PrlwmjPZqYN/EULUbHsusdwBYH0",
-    "xYl/SE4Y6/HBRC5V9ywT6JefobhUDwb5CtJl5/+NAQKBgQDtLfrEiVg5/CawUkl+",
-    "36dR9xw8Vee3sZZoh+ZKDmRpE8LogJkI3WV70wVbPJF9pohk/qNF0IhhMcdSfddN",
-    "cBfqOdR8FvYYKhfUQrpPg7XD1b/rO3IVGNoEEx6MlyiWmb68J6tgnReDDJnuBhY7",
-    "B5aa3tDu1emcAiK1uodYte5nQQKBgQDm7Vbtx6UfUveko11ag0X8F0KucyjkmpNv",
-    "nunZCMLc9tuKMa8o0GYcrPbv4+VvunbUyVFlCpGqOZ3gjAvoZHiyLmKtpopHnn12d",
-    "PdOuqA9Wuh8WEu5vjw5vb8DWq3Fsl8LE4ZZxgzs1fb5kSlFbjpJTUzq75OmlFXla",
-    "nf2r6E2FuNQKBgG4/8VFqhphtnY5YsdFIJX70Xyuswwmgg0oT4fiKuCIgDXoGTRzR",
-    "nzVrBvLusa/T8dGp982eAh+SmPwEZffuBH5zBRQRpp/uTlYAVhIVxtAxUT+IIv/8O",
-    "njklWmdzAZx2aWg8cYY2HeGZydRsvuSW3YUqcSIK87NqYI4pWKpQR/cABAoGAWLJI",
-    "ndUP9dC6V17K3pJBPTShSAFdTGZsVjhB8Y6f6ecXI9k5gd+pmNIGdtV9xpBEHC7HC",
-    "JwqnstKjHi+CiCtCyMt26zf5+pEHj+GzcJ40ZgdO8VeMJWU5EixGUS3Afwk7Uguj",
-    "nkS3qi/0kJ7kzzorQQRjyskCWTUYWOmA+YpcXERECgYEAmfmSZrvpgwUvfYFMWAOa",
-    "RKPsTtNTi6cXFUPJhrXG/Orut+0GKxWDftw/u/pULh4hc9PpYJU3dWl7tb3KaF/D",
-    "TQSzRr0+kBaG1XOPJqddIwhz/Ey/pIdWUE+gEItdcdbnA5ft6FJIEgFp7hrTAu9K",
-    "HX89A1PLyp6/l5f4xS0Gtpc=",
-    "-----END PRIVATE KEY-----"
-]
-
-cred_dict = {
-    "type": "service_account",
-    "project_id": "omegards",
-    "private_key_id": "5eedd30d67a6aad493036ce257299f0f772f7f96",
-    "private_key": "\n".join(private_key_lines),
-    "client_email": "firebase-adminsdk-fbsvc@omegards.iam.gserviceaccount.com",
-    "client_id": "108608414158489281111",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40omegards.iam.gserviceaccount.com",
-    "universe_domain": "googleapis.com"
-}
+db = None
 
 try:
-    if not firebase_admin._apps:
+    firebase_config = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+    
+    if firebase_config:
+        # Alisin ang posibleng extra quotes sa unahan at dulo kung nadali ng pag-paste
+        firebase_config = firebase_config.strip()
+        if firebase_config.startswith("'") and firebase_config.endswith("'"):
+            firebase_config = firebase_config[1:-1]
+        elif firebase_config.startswith('"') and firebase_config.endswith('"'):
+            firebase_config = firebase_config[1:-1]
+            
+        cred_dict = json.loads(firebase_config)
+        
+        # Siguraduhing tama ang formatting ng private key newlines
+        if "private_key" in cred_dict:
+            cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+            
         cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
-    db = firestore.client()
-    print("Firebase initialized successfully!")
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        print("Firebase initialized successfully from Environment Variable!")
+    else:
+        print("Firebase Init Error: FIREBASE_SERVICE_ACCOUNT environment variable is missing.")
 except Exception as e:
     print(f"Firebase Init Error: {e}")
 
@@ -122,12 +96,16 @@ def generate_key():
     if not logged_in_state:
         return "Unauthorized", 403
     
+    if db is None:
+        return "Database not initialized. Check server logs.", 500
+    
     new_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
     
     try:
         db.collection("keys").add({"key": new_key, "created_at": firestore.SERVER_TIMESTAMP})
     except Exception as e:
         print(f"Firestore save error: {e}")
+        return f"Firestore save error: {e}", 500
 
     return render_template_string(HTML_TEMPLATE, logged_in=logged_in_state, generated_key=new_key)
 
