@@ -21,13 +21,16 @@ try:
            (firebase_config.startswith('"') and firebase_config.endswith('"')):
             firebase_config = firebase_config[1:-1]
             
+        # Linisin ang mga maling escape backslashes bago i-parse para iwas PEM/JSON error
+        cleaned_config = firebase_config.replace(r'\\n', r'\n')
+        
         # Subukang i-parse bilang JSON
         try:
-            cred_dict = json.loads(firebase_config)
+            cred_dict = json.loads(cleaned_config)
         except json.JSONDecodeError:
             # Kung sakaling nagloko ang mga quotes, ayusin natin nang manu-mano
             import ast
-            cred_dict = ast.literal_eval(firebase_config)
+            cred_dict = ast.literal_eval(cleaned_config)
             
         # Ayusin ang private key newlines para hindi magka-PEM error
         if "private_key" in cred_dict:
