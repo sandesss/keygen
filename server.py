@@ -1,4 +1,4 @@
-os
+import os
 import json
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -32,7 +32,6 @@ try:
         # Ayusin ang private key newlines para hindi magka-PEM error
         if "private_key" in cred_dict:
             pk = cred_dict["private_key"]
-            # Palitan ang literal na \n ng tunay na newline kung kinakailangan
             cred_dict["private_key"] = pk.replace("\\n", "\n")
 
         cred = credentials.Certificate(cred_dict)
