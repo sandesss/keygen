@@ -7,7 +7,7 @@ import string
 app = Flask(__name__)
 
 # Palitan mo ito ng sarili mong sikretong password para sa admin login
-ADMIN_PASSWORD = "boss_rufino_secure_password"
+ADMIN_PASSWORD = "omegaaimbot"
 
 # Direktang Firebase Configuration mula sa iyong credentials
 firebase_config = {
