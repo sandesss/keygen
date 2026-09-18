@@ -117,5 +117,35 @@ def generate_key():
 
     return render_template_string(HTML_TEMPLATE, logged_in=logged_in_state, generated_key=new_key)
 
+# =========================================================
+# API ENDPOINT PARA SA DEEPCLEAN.EXE (ONLINE VERIFICATION)
+# =========================================================
+@app.route("/verify-key", methods=["POST"])
+def verify_key_api():
+    if db is None:
+        return jsonify({"success": False, "error": "Database not initialized"}), 500
+    
+    data = request.get_json()
+    entered_key = data.get("key")
+    
+    if not entered_key:
+        return jsonify({"success": False, "error": "No key provided"}), 400
+        
+    try:
+        docs = db.collection('keys').where('key', '==', entered_key).stream()
+        doc_id = None
+        for doc in docs:
+            doc_id = doc.id
+            break
+            
+        if doc_id:
+            # Burahin agad ang key sa Firestore para one-time use lang
+            db.collection('keys').document(doc_id).delete()
+            return jsonify({"success": True}), 200
+            
+        return jsonify({"success": False, "error": "Invalid key"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
