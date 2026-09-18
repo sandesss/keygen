@@ -1,39 +1,45 @@
-import os
+os
 import json
-from flask import Flask, request, jsonify, render_template_string
 import firebase_admin
 from firebase_admin import credentials, firestore
+from flask import Flask, request, jsonify, render_template_string
 import random
 import string
 
 app = Flask(__name__)
 
 ADMIN_PASSWORD = "omegaaimbot"
-
 db = None
 
 try:
     firebase_config = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
     
     if firebase_config:
-        # Alisin ang posibleng extra quotes sa unahan at dulo kung nadali ng pag-paste
+        # Linisin ang string mula sa extra quotes o whitespace
         firebase_config = firebase_config.strip()
-        if firebase_config.startswith("'") and firebase_config.endswith("'"):
-            firebase_config = firebase_config[1:-1]
-        elif firebase_config.startswith('"') and firebase_config.endswith('"'):
+        if (firebase_config.startswith("'") and firebase_config.endswith("'")) or \
+           (firebase_config.startswith('"') and firebase_config.endswith('"')):
             firebase_config = firebase_config[1:-1]
             
-        cred_dict = json.loads(firebase_config)
-        
-        # Siguraduhing tama ang formatting ng private key newlines
+        # Subukang i-parse bilang JSON
+        try:
+            cred_dict = json.loads(firebase_config)
+        except json.JSONDecodeError:
+            # Kung sakaling nagloko ang mga quotes, ayusin natin nang manu-mano
+            import ast
+            cred_dict = ast.literal_eval(firebase_config)
+            
+        # Ayusin ang private key newlines para hindi magka-PEM error
         if "private_key" in cred_dict:
-            cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
-            
+            pk = cred_dict["private_key"]
+            # Palitan ang literal na \n ng tunay na newline kung kinakailangan
+            cred_dict["private_key"] = pk.replace("\\n", "\n")
+
         cred = credentials.Certificate(cred_dict)
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
         db = firestore.client()
-        print("Firebase initialized successfully from Environment Variable!")
+        print("Firebase initialized successfully!")
     else:
         print("Firebase Init Error: FIREBASE_SERVICE_ACCOUNT environment variable is missing.")
 except Exception as e:
