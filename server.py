@@ -1,43 +1,106 @@
 import os
-import json
 from flask import Flask, request, jsonify, render_template_string
 import firebase_admin
 from firebase_admin import credentials, firestore
+import random
+import string
 
 app = Flask(__name__)
 
+ADMIN_PASSWORD = "boss_rufino_secure_password"
+
+# Direktang inilagay dito ang credentials para iwas-error sa environment variables ng Render
+cred_dict = {
+    "type": "service_account",
+    "project_id": "omegards",
+    "private_key_id": "5eedd30d67a6aad493036ce257299f0f772f7f96",
+    "private_key": """-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDV8zNneh9Sc9pS\nvuJcb4Hy6rAD+hL9JjHnMdSP2yGVGpgWKhH8PWrDwkqZcDM7fpJaWb+xgLbQ2k1T\nxqFlJXNQ3/1GUqNubVUyM/+wnx4t1G/E9ceessJyg0lBxhjYeCwEu2U7KbQBgl1B\nKNWE+AOzKJ45lNKmebKYbBn08cN32Cq4PS7FI+jlS29Z55hNr7BbfsSE4Jb9EpIE\n7PqRSzPp47lrz1xWR94mtqrP2a4toT4vI+NsSayjTqBQQnL8l/PI6dQCOH7vv+tW\n2uILCxxwrYs+Vyl/YhrjD8IZGhSqdY5uSFefqriZ2fltu+CuXqkXH5SUFBIrQBi0\nhAMNWk51AgMBAAECggEAHCuCaCx/NUcFxwFVIqCX9pkKBewGVgiSZ4N7HlnW6R/w\nSHLPnWukxBOv6NYKGNpIgNbyU3fEGmmz5sTveTbeIRbs7TZySFbi8dJA50t8GMKw\n2LkXyIB288bvfVaM7OuduB3IbWrHRa+ZgbvTqUdSjWNaufArcDnz1vfczxCKERxK\nmSy0XUK6gyZ7JBoWSSjA8rCv5Xez5VkvJDwKGo4iQavcLv7YfqCu9xgvh+LApu81\nCCWyZ4CnMUzf8SJMZbZejnRSKIX8p9kEg7/p/PrlwmjPZqYN/EULUbHsusdwBYH0\nxYl/SE4Y6/HBRC5V9ywT6JefobhUDwb5CtJl5/+NAQKBgQDtLfrEiVg5/CawUkl+\n36dR9xw8Vee3sZZoh+ZKDmRpE8LogJkI3WV70wVbPJF9pohk/qNF0IhhMcdSfddN\ncBfqOdR8FvYYKhfUQrpPg7XD1b/rO3IVGNoEEx6MlyiWmb68J6tgnReDDJnuBhY7\nB5aa3tDu1emcAiK1uodYte5nQQKBgQDm7Vbtx6UfUveko11ag0X8F0KucyjkmpNv\nunZCMLc9tuKMa8o0GYcrPbv4+VvunbUyVFlCpGqOZ3gjAvoZHiyLmKtpopHnn12d\nPdOuqA9Wuh8WEu5vjw5vb8DWq3Fsl8LE4ZZxgzs1fb5kSlFbjpJTUzq75OmlFXla\nf2r6E2FuNQKBgG4/8VFqhphtnY5YsdFIJX70Xyuswwmgg0oT4fiKuCIgDXoGTRzR\nzVrBvLusa/T8dGp982eAh+SmPwEZffuBH5zBRQRpp/uTlYAVhIVxtAxUT+IIv/8O\njklWmdzAZx2aWg8cYY2HeGZydRsvuSW3YUqcSIK87NqYI4pWKpQR/cABAoGAWLJI\ndUP9dC6V17K3pJBPTShSAFdTGZsVjhB8Y6f6ecXI9k5gd+pmNIGdtV9xpBEHC7HC\nJwqnstKjHi+CiCtCyMt26zf5+pEHj+GzcJ40ZgdO8VeMJWU5EixGUS3Afwk7Uguj\nkS3qi/0kJ7kzzorQQRjyskCWTUYWOmA+YpcXERECgYEAmfmSZrvpgwUvfYFMWAOa\RKPsTtNTi6cXFUPJhrXG/Orut+0GKxWDftw/u/pULh4hc9PpYJU3dWl7tb3KaF/D\nTQSzRr0+kBaG1XOPJqddIwhz/Ey/pIdWUE+gEItdcdbnA5ft6FJIEgFp7hrTAu9K\nHX89A1PLyp6/l5f4xS0Gtpc=\n-----END PRIVATE KEY-----""".replace('\\n', '\n'),
+    "client_email": "firebase-adminsdk-fbsvc@omegards.iam.gserviceaccount.com",
+    "client_id": "108608414158489281111",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40omegards.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+}
+
 try:
-    project_id = os.environ.get("FIREBASE_PROJECT_ID")
-    client_email = os.environ.get("FIREBASE_CLIENT_EMAIL")
-    private_key = os.environ.get("FIREBASE_PRIVATE_KEY")
-
-    if project_id and client_email and private_key:
-        # Linisin nang husto ang private key laban sa literal na \n o extra backslashes
-        cleaned_key = private_key.replace('\\n', '\n').strip()
-        if not cleaned_key.startswith("-----BEGIN PRIVATE KEY-----"):
-            # Kung sakaling may nakapulot na quotes sa unahan o dulo
-            cleaned_key = cleaned_key.strip('"').strip("'")
-
-        cred_dict = {
-            "type": "service_account",
-            "project_id": project_id,
-            "private_key_id": os.environ.get("FIREBASE_PRIVATE_KEY_ID", "5eedd30d67a6aad493036ce257299f0f772f7f96"),
-            "private_key": cleaned_key,
-            "client_email": client_email,
-            "client_id": os.environ.get("FIREBASE_CLIENT_ID", "108608414158489281111"),
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{client_email.replace('@', '%40')}",
-            "universe_domain": "googleapis.com"
-        }
-        cred = credentials.Certificate(cred_dict)
-    else:
-        cred = credentials.Certificate("serviceAccountKey.json")
-
     if not firebase_admin._apps:
+        cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
     db = firestore.client()
     print("Firebase initialized successfully!")
 except Exception as e:
     print(f"Firebase Init Error: {e}")
+
+# HTML Template at mga Routes mo
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Key Generator Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 40px; text-align: center; }
+        .box { background: #1e1e1e; padding: 30px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input, button { padding: 10px; margin: 10px; font-size: 16px; border-radius: 4px; border: none; }
+        button { background: #4CAF50; color: white; cursor: pointer; }
+        button:hover { background: #45a049; }
+        pre { background: #2d2d2d; padding: 15px; text-align: left; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Omegards Keygen System</h2>
+        {% if not logged_in %}
+        <form method="POST" action="/login">
+            <input type="password" name="password" placeholder="Enter Admin Password" required>
+            <br>
+            <button type="submit">Login</button>
+        </form>
+        {% else %}
+        <form method="POST" action="/generate-key">
+            <button type="submit">Generate New Key</button>
+        </form>
+        {% if generated_key %}
+        <h3>Generated Key:</h3>
+        <pre>{{ generated_key }}</pre>
+        {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
+"""
+
+logged_in_state = False
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template_string(HTML_TEMPLATE, logged_in=logged_in_state, generated_key=None)
+
+@app.route("/login", methods=["POST"])
+def login():
+    global logged_in_state
+    pwd = request.form.get("password")
+    if pwd == ADMIN_PASSWORD:
+        logged_in_state = True
+    return render_template_string(HTML_TEMPLATE, logged_in=logged_in_state, generated_key=None)
+
+@app.route("/generate-key", methods=["POST"])
+def generate_key():
+    global logged_in_state
+    if not logged_in_state:
+        return "Unauthorized", 403
+    
+    # Gumawa ng random key
+    new_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
+    
+    try:
+        # I-save sa Firestore kung gumagana na ang DB
+        db.collection("keys").add({"key": new_key, "created_at": firestore.SERVER_TIMESTAMP})
+    except Exception as e:
+        print(f"Firestore save error: {e}")
+
+    return render_template_string(HTML_TEMPLATE, logged_in=logged_in_state, generated_key=new_key)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
