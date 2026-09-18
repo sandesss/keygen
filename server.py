@@ -9,12 +9,39 @@ app = Flask(__name__)
 
 ADMIN_PASSWORD = "boss_rufino_secure_password"
 
-# Direktang inilagay dito ang credentials para iwas-error sa environment variables ng Render
+# Regular multiline string na may totoong line breaks para walang backslash error
 cred_dict = {
     "type": "service_account",
     "project_id": "omegards",
     "private_key_id": "5eedd30d67a6aad493036ce257299f0f772f7f96",
-    "private_key": """-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDV8zNneh9Sc9pS\nvuJcb4Hy6rAD+hL9JjHnMdSP2yGVGpgWKhH8PWrDwkqZcDM7fpJaWb+xgLbQ2k1T\nxqFlJXNQ3/1GUqNubVUyM/+wnx4t1G/E9ceessJyg0lBxhjYeCwEu2U7KbQBgl1B\nKNWE+AOzKJ45lNKmebKYbBn08cN32Cq4PS7FI+jlS29Z55hNr7BbfsSE4Jb9EpIE\n7PqRSzPp47lrz1xWR94mtqrP2a4toT4vI+NsSayjTqBQQnL8l/PI6dQCOH7vv+tW\n2uILCxxwrYs+Vyl/YhrjD8IZGhSqdY5uSFefqriZ2fltu+CuXqkXH5SUFBIrQBi0\nhAMNWk51AgMBAAECggEAHCuCaCx/NUcFxwFVIqCX9pkKBewGVgiSZ4N7HlnW6R/w\nSHLPnWukxBOv6NYKGNpIgNbyU3fEGmmz5sTveTbeIRbs7TZySFbi8dJA50t8GMKw\n2LkXyIB288bvfVaM7OuduB3IbWrHRa+ZgbvTqUdSjWNaufArcDnz1vfczxCKERxK\nmSy0XUK6gyZ7JBoWSSjA8rCv5Xez5VkvJDwKGo4iQavcLv7YfqCu9xgvh+LApu81\nCCWyZ4CnMUzf8SJMZbZejnRSKIX8p9kEg7/p/PrlwmjPZqYN/EULUbHsusdwBYH0\nxYl/SE4Y6/HBRC5V9ywT6JefobhUDwb5CtJl5/+NAQKBgQDtLfrEiVg5/CawUkl+\n36dR9xw8Vee3sZZoh+ZKDmRpE8LogJkI3WV70wVbPJF9pohk/qNF0IhhMcdSfddN\ncBfqOdR8FvYYKhfUQrpPg7XD1b/rO3IVGNoEEx6MlyiWmb68J6tgnReDDJnuBhY7\nB5aa3tDu1emcAiK1uodYte5nQQKBgQDm7Vbtx6UfUveko11ag0X8F0KucyjkmpNv\nunZCMLc9tuKMa8o0GYcrPbv4+VvunbUyVFlCpGqOZ3gjAvoZHiyLmKtpopHnn12d\nPdOuqA9Wuh8WEu5vjw5vb8DWq3Fsl8LE4ZZxgzs1fb5kSlFbjpJTUzq75OmlFXla\nf2r6E2FuNQKBgG4/8VFqhphtnY5YsdFIJX70Xyuswwmgg0oT4fiKuCIgDXoGTRzR\nzVrBvLusa/T8dGp982eAh+SmPwEZffuBH5zBRQRpp/uTlYAVhIVxtAxUT+IIv/8O\njklWmdzAZx2aWg8cYY2HeGZydRsvuSW3YUqcSIK87NqYI4pWKpQR/cABAoGAWLJI\ndUP9dC6V17K3pJBPTShSAFdTGZsVjhB8Y6f6ecXI9k5gd+pmNIGdtV9xpBEHC7HC\nJwqnstKjHi+CiCtCyMt26zf5+pEHj+GzcJ40ZgdO8VeMJWU5EixGUS3Afwk7Uguj\nkS3qi/0kJ7kzzorQQRjyskCWTUYWOmA+YpcXERECgYEAmfmSZrvpgwUvfYFMWAOa\RKPsTtNTi6cXFUPJhrXG/Orut+0GKxWDftw/u/pULh4hc9PpYJU3dWl7tb3KaF/D\nTQSzRr0+kBaG1XOPJqddIwhz/Ey/pIdWUE+gEItdcdbnA5ft6FJIEgFp7hrTAu9K\nHX89A1PLyp6/l5f4xS0Gtpc=\n-----END PRIVATE KEY-----""".replace('\\n', '\n'),
+    "private_key": """-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDV8zNneh9Sc9pS
+vuJcb4Hy6rAD+hL9JjHnMdSP2yGVGpgWKhH8PWrDwkqZcDM7fpJaWb+xgLbQ2k1T
+xqFlJXNQ3/1GUqNubVUyM/+wnx4t1G/E9ceessJyg0lBxhjYeCwEu2U7KbQBgl1B
+KNWE+AOzKJ45lNKmebKYbBn08cN32Cq4PS7FI+jlS29Z55hNr7BbfsSE4Jb9EpIE
+7PqRSzPp47lrz1xWR94mtqrP2a4toT4vI+NsSayjTqBQQnL8l/PI6dQCOH7vv+tW
+2uILCxxwrYs+Vyl/YhrjD8IZGhSqdY5uSFefqriZ2fltu+CuXqkXH5SUFBIrQBi0
+hAMNWk51AgMBAAECggEAHCuCaCx/NUcFxwFVIqCX9pkKBewGVgiSZ4N7HlnW6R/w
+SHLPnWukxBOv6NYKGNpIgNbyU3fEGmmz5sTveTbeIRbs7TZySFbi8dJA50t8GMKw
+2LkXyIB288bvfVaM7OuduB3IbWrHRa+ZgbvTqUdSjWNaufArcDnz1vfczxCKERxK
+mSy0XUK6gyZ7JBoWSSjA8rCv5Xez5VkvJDwKGo4iQavcLv7YfqCu9xgvh+LApu81
+CCWyZ4CnMUzf8SJMZbZejnRSKIX8p9kEg7/p/PrlwmjPZqYN/EULUbHsusdwBYH0
+xYl/SE4Y6/HBRC5V9ywT6JefobhUDwb5CtJl5/+NAQKBgQDtLfrEiVg5/CawUkl+
+36dR9xw8Vee3sZZoh+ZKDmRpE8LogJkI3WV70wVbPJF9pohk/qNF0IhhMcdSfddN
+cBfqOdR8FvYYKhfUQrpPg7XD1b/rO3IVGNoEEx6MlyiWmb68J6tgnReDDJnuBhY7
+B5aa3tDu1emcAiK1uodYte5nQQKBgQDm7Vbtx6UfUveko11ag0X8F0KucyjkmpNv
+nunZCMLc9tuKMa8o0GYcrPbv4+VvunbUyVFlCpGqOZ3gjAvoZHiyLmKtpopHnn12d
+PdOuqA9Wuh8WEu5vjw5vb8DWq3Fsl8LE4ZZxgzs1fb5kSlFbjpJTUzq75OmlFXla
+nf2r6E2FuNQKBgG4/8VFqhphtnY5YsdFIJX70Xyuswwmgg0oT4fiKuCIgDXoGTRzR
+nzVrBvLusa/T8dGp982eAh+SmPwEZffuBH5zBRQRpp/uTlYAVhIVxtAxUT+IIv/8O
+njklWmdzAZx2aWg8cYY2HeGZydRsvuSW3YUqcSIK87NqYI4pWKpQR/cABAoGAWLJI
+ndUP9dC6V17K3pJBPTShSAFdTGZsVjhB8Y6f6ecXI9k5gd+pmNIGdtV9xpBEHC7HC
+JwqnstKjHi+CiCtCyMt26zf5+pEHj+GzcJ40ZgdO8VeMJWU5EixGUS3Afwk7Uguj
+nkS3qi/0kJ7kzzorQQRjyskCWTUYWOmA+YpcXERECgYEAmfmSZrvpgwUvfYFMWAOa
+RKPsTtNTi6cXFUPJhrXG/Orut+0GKxWDftw/u/pULh4hc9PpYJU3dWl7tb3KaF/D
+TQSzRr0+kBaG1XOPJqddIwhz/Ey/pIdWUE+gEItdcdbnA5ft6FJIEgFp7hrTAu9K
+HX89A1PLyp6/l5f4xS0Gtpc=
+-----END PRIVATE KEY-----""",
     "client_email": "firebase-adminsdk-fbsvc@omegards.iam.gserviceaccount.com",
     "client_id": "108608414158489281111",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -33,7 +60,6 @@ try:
 except Exception as e:
     print(f"Firebase Init Error: {e}")
 
-# HTML Template at mga Routes mo
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -91,11 +117,9 @@ def generate_key():
     if not logged_in_state:
         return "Unauthorized", 403
     
-    # Gumawa ng random key
     new_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
     
     try:
-        # I-save sa Firestore kung gumagana na ang DB
         db.collection("keys").add({"key": new_key, "created_at": firestore.SERVER_TIMESTAMP})
     except Exception as e:
         print(f"Firestore save error: {e}")
